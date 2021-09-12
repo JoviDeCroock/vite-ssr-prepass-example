@@ -1,19 +1,35 @@
-import React from "react";
-import { Counter } from "./Counter";
+import React from 'react';
+import { gql, useQuery } from 'urql';
 
-export { Page };
+const POKEMONS_QUERY = gql`
+  query Pokemons {
+    pokemons(limit: 10) {
+      id
+      name
+    }
+  }
+`;
 
-function Page() {
+const Home = () => {
+  const [result] = useQuery({ query: POKEMONS_QUERY });
+
+  const { data, fetching, error } = result;
+
   return (
-    <>
-      <h1>Welcome</h1>
-      This page is:
-      <ul>
-        <li>Rendered to HTML.</li>
-        <li>
-          Interactive. <Counter />
-        </li>
-      </ul>
-    </>
+    <div>
+      {fetching && <p>Loading...</p>}
+
+      {error && <p>Oh no... {error.message}</p>}
+
+      {data && (
+        <ul>
+          {data.pokemons.map((pokemon: { name: string; id: string; }) => (
+            <li key={pokemon.id}>{pokemon.name}</li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
-}
+};
+
+export default Home;
